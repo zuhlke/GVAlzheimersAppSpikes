@@ -1,11 +1,6 @@
 package com.example.gvalzheimersappspikes.batterylevel
 
 import android.content.Context
-import android.content.Context.BATTERY_SERVICE
-import android.os.BatteryManager
-import android.os.Build
-import androidx.annotation.RequiresApi
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,9 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
 
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun BatteryLevelCheckerScreen(context: Context, lifecycle: Lifecycle) {
     var batteryLevel by remember { mutableStateOf(-1) }
@@ -61,3 +54,6 @@ fun BatteryLevelCheckerScreen(context: Context, lifecycle: Lifecycle) {
         }
     }
 }
+
+//Work manager, print something in logcat, only print it if theres wifi,
+// i turn wifi off, it shouldnt print, then i reboot the device, something should be printed in logcat after turning on wifi

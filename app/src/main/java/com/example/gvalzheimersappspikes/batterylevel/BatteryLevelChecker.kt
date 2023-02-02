@@ -34,7 +34,7 @@ class BatteryLevelChecker(
 
                 val level = it.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
                 val charge =
-                    it.getIntExtra(BatteryManager.EXTRA_STATUS, -1) == BatteryState.STATUS_CHARGING
+                    it.getIntExtra(BatteryManager.EXTRA_STATUS, -1) == BatteryManager.BATTERY_STATUS_CHARGING
                 listener?.invoke(Stats(level, charge))
 
             }
@@ -43,22 +43,6 @@ class BatteryLevelChecker(
 
     fun setListener(listener: ((Stats) -> Unit)?) {
         this.listener = listener
-    }
-
-    fun start() {
-        _context.registerReceiver(
-            broadcastBatteryInfoListener,
-            IntentFilter(Intent.ACTION_BATTERY_CHANGED)
-        )
-    }
-
-    fun stop() {
-        _context.unregisterReceiver(broadcastBatteryInfoListener)
-    }
-
-    fun destroy() {
-        _lifecycle.removeObserver(this)
-        listener = null
     }
 
     override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {

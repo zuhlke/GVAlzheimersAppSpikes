@@ -11,6 +11,7 @@ import androidx.compose.material.Surface
 import androidx.compose.ui.Modifier
 import com.example.gvalzheimersappspikes.averagenoiselevel.MainViewModel
 import com.example.gvalzheimersappspikes.batterylevel.BatteryLevelCheckerScreen
+import com.example.gvalzheimersappspikes.networkconnection.ConnectivityIndicator
 import com.example.gvalzheimersappspikes.ui.theme.GVAlzheimersAppSpikesTheme
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 
@@ -31,9 +32,21 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    BatteryLevelCheckerScreen(this, lifecycle = lifecycle)
+                    ///Get Battery Level///
+                    //BatteryLevelCheckerScreen(this, lifecycle = lifecycle)
+
+                    ///Get Noise Level///
                     //requestAudioRecording()
+
+                    ///Set Brightness///
                     //ChangeBrightness().ForceBrightness(0.1f)
+
+                    ///Get Volume and get it to 80%///
+                    //AdjustVolume().getCurrentVolume(this)
+                    //AdjustVolume(this).fixVolume()
+
+                    ///Internet Connectivity Check///
+                    ConnectivityIndicator()
                 }
             }
         }
