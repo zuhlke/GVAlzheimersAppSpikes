@@ -10,13 +10,14 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.ui.Modifier
 import com.example.gvalzheimersappspikes.averagenoiselevel.MainViewModel
-import com.example.gvalzheimersappspikes.brightnesslevel.ChangeBrightness
+import com.example.gvalzheimersappspikes.batterylevel.BatteryLevelCheckerScreen
 import com.example.gvalzheimersappspikes.ui.theme.GVAlzheimersAppSpikesTheme
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 
 @ExperimentalPermissionsApi
 
 class MainActivity : ComponentActivity() {
+
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
@@ -30,8 +31,9 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    requestAudioRecording()
-                    ChangeBrightness().ForceBrightness(0.1f)
+                    BatteryLevelCheckerScreen(this, lifecycle = lifecycle)
+                    //requestAudioRecording()
+                    //ChangeBrightness().ForceBrightness(0.1f)
                 }
             }
         }
@@ -39,4 +41,5 @@ class MainActivity : ComponentActivity() {
     private fun requestAudioRecording() {
         requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
     }
+
 }
