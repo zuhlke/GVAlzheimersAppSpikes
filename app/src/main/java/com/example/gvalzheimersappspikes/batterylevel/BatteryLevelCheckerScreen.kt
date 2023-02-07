@@ -54,6 +54,3 @@ fun BatteryLevelCheckerScreen(context: Context, lifecycle: Lifecycle) {
         }
     }
 }
-
-//Work manager, print something in logcat, only print it if theres wifi,
-// i turn wifi off, it shouldnt print, then i reboot the device, something should be printed in logcat after turning on wifi
