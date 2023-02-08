@@ -3,8 +3,6 @@ package com.example.gvalzheimersappspikes
 import android.Manifest
 import android.content.Context
 import android.os.Bundle
-import android.provider.Settings
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -17,8 +15,6 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.example.gvalzheimersappspikes.averagenoiselevel.MainViewModel
-import com.example.gvalzheimersappspikes.brightnesslevel.ChangeBrightness
-import com.example.gvalzheimersappspikes.createrecording.Recorder
 import com.example.gvalzheimersappspikes.ui.theme.GVAlzheimersAppSpikesTheme
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 
@@ -82,8 +78,9 @@ class MainActivity : ComponentActivity() {
                     //this.setBrightness((255*0.8).toFloat())
                     //ChangeBrightness().ForceBrightness(brightness = 0.8f)
                     //Log.d("SCReaaa",oldBrightness.toString())
-                    val recorder = Recorder(applicationContext)
-                    RecordingUI(recorder)
+                    //val recorderManager = RecorderManager(applicationContext)
+                    val mainViewModel = MainViewModel()
+                    RecordingUI(mainViewModel, this)
 
                 }
 
@@ -104,12 +101,12 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun RecordingUI(recorder: Recorder) {
+fun RecordingUI(mainViewModel: MainViewModel, context: Context) {
     Column {
-        Button(onClick = { recorder.start() }) {
+        Button(onClick = { mainViewModel.startRecording(context) }) {
             Text("Start Recording")
         }
-        Button(onClick = { recorder.stop() }) {
+        Button(onClick = { mainViewModel.stopRecording() }) {
             Text("Stop Recording")
         }
     }

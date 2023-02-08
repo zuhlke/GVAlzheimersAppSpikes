@@ -9,16 +9,17 @@ import com.example.gvalzheimersappspikes.averagenoiselevel.PcmToWavUtil
 import java.io.FileOutputStream
 import java.util.concurrent.atomic.AtomicBoolean
 
-
-class Recorder(private val context: Context, private val getAudioRecord: () -> AudioRecord = ::createAudioRecord) {
+class Recorder(
+    private val context: Context,
+    private val getAudioRecord: () -> AudioRecord = ::createAudioRecord
+) {
 
     private val recording = AtomicBoolean(false)
 
+
     fun start() {
         recording.set(true)
-        Thread {
-            startRecording()
-        }.start()
+        startRecording()
     }
 
     fun stop() {
@@ -39,13 +40,12 @@ class Recorder(private val context: Context, private val getAudioRecord: () -> A
             recorder.release()
         }
 
-//        val pcmData = context.openFileInput("record.pcm").readBytes()
-//
-//        context.openFileOutput("record.wav", Context.MODE_PRIVATE).use {
-//            it.write(PcmToWavUtil.pcmToWav(pcmData, 1, 44100, 16))
-//        }
-    }
+        val pcmData = context.openFileInput("record.pcm").readBytes()
 
+        context.openFileOutput("record.wav", Context.MODE_PRIVATE).use {
+            it.write(PcmToWavUtil.pcmToWav(pcmData, 1, 44100, 16))
+        }
+    }
 
     private fun appendToFile(
         fileOutputStream: FileOutputStream,
