@@ -82,8 +82,8 @@ class MainActivity : ComponentActivity() {
                     //this.setBrightness((255*0.8).toFloat())
                     //ChangeBrightness().ForceBrightness(brightness = 0.8f)
                     //Log.d("SCReaaa",oldBrightness.toString())
-                    val recorder = Recorder()
-                    RecordingUI(recorder, this)
+                    val recorder = Recorder(applicationContext)
+                    RecordingUI(recorder)
 
                 }
 
@@ -104,9 +104,9 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun RecordingUI(recorder: Recorder, context: Context) {
+fun RecordingUI(recorder: Recorder) {
     Column {
-        Button(onClick = { recorder.start(context) }) {
+        Button(onClick = { recorder.start() }) {
             Text("Start Recording")
         }
         Button(onClick = { recorder.stop() }) {

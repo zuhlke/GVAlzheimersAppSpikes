@@ -10,16 +10,14 @@ import java.io.FileOutputStream
 import java.util.concurrent.atomic.AtomicBoolean
 
 
-class Recorder {
+class Recorder(private val context: Context, private val getAudioRecord: () -> AudioRecord = { createAudioRecord() }) {
 
     private val recording = AtomicBoolean(false)
 
-    private lateinit var recorder: AudioRecord
-
-    fun start(context: Context) {
+    fun start() {
         recording.set(true)
         Thread {
-            startRecording(context)
+            startRecording()
         }.start()
     }
 
@@ -27,25 +25,14 @@ class Recorder {
         recording.set(false)
     }
 
-    @SuppressLint("MissingPermission")
-    private fun startRecording(context: Context) {
-        val sampleRate = 44100
-        val channelConfig = AudioFormat.CHANNEL_IN_MONO
-        val audioFormat = AudioFormat.ENCODING_PCM_16BIT
-        val bufferSize = AudioRecord.getMinBufferSize(sampleRate, channelConfig, audioFormat)
-        recorder = AudioRecord(
-            MediaRecorder.AudioSource.MIC,
-            sampleRate,
-            channelConfig,
-            audioFormat,
-            bufferSize
-        )
+    private fun startRecording() {
+        val recorder = getAudioRecord()
 
-        val data = ShortArray(bufferSize)
         context.openFileOutput("record.pcm", Context.MODE_PRIVATE).use { fileOutputStream ->
+            val data = ShortArray(recorder.bufferSizeInFrames)
             recorder.startRecording()
             while (recording.get()) {
-                val shortsRead = recorder.read(data, 0, bufferSize)
+                val shortsRead = recorder.read(data, 0, data.size)
                 appendToFile(fileOutputStream, data, shortsRead)
             }
             recorder.stop()
@@ -68,9 +55,6 @@ class Recorder {
         val pcmData = data.filterIndexed { index, _ -> index < shortsRead }.flatMap { it.toBytes() }
             .toByteArray()
         fileOutputStream.write(pcmData)
-//        context.openFileOutput("record.wav", Context.MODE_PRIVATE).use {
-//            it.write(PcmToWavUtil.pcmToWav(pcmData, 1, 44100, 16))
-//        }
     }
 
 
@@ -81,3 +65,17 @@ class Recorder {
 }
 
 
+@SuppressLint("MissingPermission")
+fun createAudioRecord(): AudioRecord {
+    val sampleRate = 44100
+    val channelConfig = AudioFormat.CHANNEL_IN_MONO
+    val audioFormat = AudioFormat.ENCODING_PCM_16BIT
+    val bufferSize = AudioRecord.getMinBufferSize(sampleRate, channelConfig, audioFormat)
+    return AudioRecord(
+        MediaRecorder.AudioSource.MIC,
+        sampleRate,
+        channelConfig,
+        audioFormat,
+        bufferSize
+    )
+}
