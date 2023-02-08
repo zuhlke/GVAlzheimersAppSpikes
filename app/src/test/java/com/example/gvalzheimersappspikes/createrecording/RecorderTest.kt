@@ -43,15 +43,15 @@ class RecorderTest {
             1
         }
         testSubject.start()
-        val bufferSlot = slot<ShortArray>()
-        val bufferSizeSlot = slot<Int>()
+        val bufferSlot = slot<ShortArray>() //[0,0]
+        val bufferSizeSlot = slot<Int>() //size of the thing above, which is 2
 
         verify {
             audioRecord.read(capture(bufferSlot), 0, capture(bufferSizeSlot))
         }
 
-        assertEquals(2, bufferSlot.captured.size)
-        assertEquals(2, bufferSizeSlot.captured)
+        assertEquals(2, bufferSlot.captured.size) //[0,0] -> 2
+        assertEquals(2, bufferSizeSlot.captured) //2
     }
 
     @Test
