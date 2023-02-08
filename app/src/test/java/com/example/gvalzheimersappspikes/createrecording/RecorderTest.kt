@@ -6,22 +6,23 @@ import android.media.AudioRecord
 import android.media.MediaRecorder
 import io.mockk.*
 import org.junit.Assert.assertEquals
+import org.junit.Before
 import org.junit.Test
 
 class RecorderTest {
 
+    private val audioRecord = mockk<AudioRecord>(relaxed = true)
+    private val context = mockk<Context> {
+        every { openFileOutput(any(), any()) } returns mockk(relaxUnitFun = true)
+    }
+    private val testSubject = Recorder(context, getAudioRecord = { audioRecord })
+
     @Test
     fun `can record audio`() {
-        val audioRecord = mockk<AudioRecord>(relaxed = true)
-        val context = mockk<Context> {
-            every { openFileOutput(any(), any()) } returns mockk(relaxUnitFun = true)
-        }
-        val testSubject = Recorder(context, getAudioRecord = { audioRecord })
         every { audioRecord.read(any<ShortArray>(), 0, any()) } answers {
             testSubject.stop()
             1
         }
-
         testSubject.start()
 
         verifyOrder {
@@ -32,6 +33,25 @@ class RecorderTest {
             audioRecord.release()
         }
         confirmVerified(audioRecord)
+    }
+
+    @Test
+    fun `uses correct buffer`() {
+        every { audioRecord.bufferSizeInFrames } returns 2
+        every { audioRecord.read(any<ShortArray>(), 0, any()) } answers {
+            testSubject.stop()
+            1
+        }
+        testSubject.start()
+        val bufferSlot = slot<ShortArray>()
+        val bufferSizeSlot = slot<Int>()
+
+        verify {
+            audioRecord.read(capture(bufferSlot), 0, capture(bufferSizeSlot))
+        }
+
+        assertEquals(2, bufferSlot.captured.size)
+        assertEquals(2, bufferSizeSlot.captured)
     }
 
     @Test

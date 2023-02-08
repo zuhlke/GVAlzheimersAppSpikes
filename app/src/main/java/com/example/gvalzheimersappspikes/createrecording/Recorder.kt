@@ -40,11 +40,11 @@ class Recorder(
             recorder.release()
         }
 
-        val pcmData = context.openFileInput("record.pcm").readBytes()
-
-        context.openFileOutput("record.wav", Context.MODE_PRIVATE).use {
-            it.write(PcmToWavUtil.pcmToWav(pcmData, 1, 44100, 16))
-        }
+//        val pcmData = context.openFileInput("record.pcm").readBytes()
+//
+//        context.openFileOutput("record.wav", Context.MODE_PRIVATE).use {
+//            it.write(PcmToWavUtil.pcmToWav(pcmData, 1, 44100, 16))
+//        }
     }
 
     private fun appendToFile(
