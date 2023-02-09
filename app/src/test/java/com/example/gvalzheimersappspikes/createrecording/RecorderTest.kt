@@ -4,9 +4,12 @@ import android.content.Context
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
+import app.cash.turbine.test
 import io.mockk.*
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import java.io.File
 import java.io.FileOutputStream
 import kotlin.math.ceil
 
@@ -16,6 +19,10 @@ class RecorderTest {
     private val fileOutputStream = mockk<FileOutputStream>(relaxUnitFun = true)
     private val context = mockk<Context> {
         every { openFileOutput(any(), any()) } returns fileOutputStream
+        val filenameSlot = slot<String>()
+        every { getFileStreamPath(capture(filenameSlot)) } answers {
+            File(filenameSlot.captured)
+        }
     }
     private val testSubject = Recorder(context, getAudioRecord = { audioRecord })
 
@@ -25,6 +32,7 @@ class RecorderTest {
             testSubject.stop()
             1
         }
+
         testSubject.start()
 
         verifyOrder {
@@ -44,7 +52,9 @@ class RecorderTest {
             testSubject.stop()
             1
         }
+
         testSubject.start()
+
         val bufferSlot = slot<ShortArray>() //[0,0]
         val bufferSizeSlot = slot<Int>() //size of the thing above, which is 2
 
@@ -91,6 +101,20 @@ class RecorderTest {
                 testSubject.stop()
             }
             shortsRead
+        }
+    }
+
+    @Test
+    fun `emits event when stopped`() = runTest {
+        every { audioRecord.read(any<ShortArray>(), 0, any()) } answers {
+            testSubject.stop()
+            1
+        }
+
+        testSubject.state.test {
+            testSubject.start()
+            assertEquals(RecorderState.NotStarted, awaitItem())
+            assertEquals(RecorderState.Completed(File("record.pcm")), awaitItem())
         }
     }
 

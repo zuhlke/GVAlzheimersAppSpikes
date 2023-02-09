@@ -5,7 +5,9 @@ import android.content.Context
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
-import com.example.gvalzheimersappspikes.averagenoiselevel.PcmToWavUtil
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import java.io.File
 import java.io.FileOutputStream
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -16,6 +18,8 @@ class Recorder(
 
     private val recording = AtomicBoolean(false)
 
+    private val _state = MutableStateFlow<RecorderState>(RecorderState.NotStarted)
+    val state: StateFlow<RecorderState> = _state
 
     fun start() {
         recording.set(true)
@@ -39,6 +43,7 @@ class Recorder(
             recorder.stop()
             recorder.release()
         }
+        _state.value = RecorderState.Completed(context.getFileStreamPath("record.pcm"))
 
 //        val pcmData = context.openFileInput("record.pcm").readBytes()
 //
@@ -57,11 +62,14 @@ class Recorder(
         fileOutputStream.write(pcmData)
     }
 
-
     private fun Short.toBytes(): List<Byte> {
         return listOf(this.toByte(), (this.toInt() shr 8).toByte())
     }
+}
 
+sealed class RecorderState {
+    object NotStarted : RecorderState()
+    data class Completed(val file: File) : RecorderState()
 }
 
 

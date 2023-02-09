@@ -23,12 +23,12 @@ class UploadFileTest {
 
     @Test
     fun `can get pre-signed url for upload`() = runTest {
-        setupMocks("helloworld.txt", MediaType.get("audio/pcm"))
+        setupMocks("helloworld.pcm", MediaType.get("audio/pcm"))
         val testSubject = UploadFile(fileUploadService)
 
-        testSubject("helloworld.txt", fileToUpload)
+        testSubject("helloworld.pcm", fileToUpload)
 
-        coVerify { fileUploadService.getPreSignedUrl("helloworld.txt") }
+        coVerify { fileUploadService.getPreSignedUrl("helloworld.pcm") }
     }
 
     @Test
