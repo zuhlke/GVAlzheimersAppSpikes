@@ -8,26 +8,30 @@ import org.junit.Test
 import java.io.File
 
 class UploadFileTest {
+
+    init {
+        mockkStatic("okhttp3.RequestBody")
+    }
+
+    private val fileToUpload = mockk<File>(relaxed = true)
+    private val getMediaType = mockk<(String) -> MediaType>()
+    private val fileUploadService = mockk<FileUploadService>()
+    private val preSignedUrl = "http://localhost/upload"
+    private val requestBody = mockk<RequestBody>()
+
     @Test
     fun `can get pre-signed url for upload`() = runTest {
-        val file = mockk<File>()
-        val fileUploadService = mockk<FileUploadService>(relaxed = true)
+        setupMocks("helloworld.txt", MediaType.get("audio/pcm"))
         val testSubject = UploadFile(fileUploadService)
 
-        testSubject("helloworld.txt", file)
+        testSubject("helloworld.txt", fileToUpload)
 
         coVerify { fileUploadService.getPreSignedUrl("helloworld.txt") }
     }
 
     @Test
     fun `uploads file to pre-signed url`() = runTest {
-        val preSignedUrl = "http://localhost/upload"
-        val fileToUpload = mockk<File>()
-        val fileUploadService = mockk<FileUploadService> {
-            coEvery { getPreSignedUrl("helloworld.pcm") } returns preSignedUrl
-            coEvery { upload(preSignedUrl, any()) } returns Unit
-        }
-        val requestBody = mockRequestBodyCreate(fileToUpload, mediaTypeString = "audio/pcm")
+        setupMocks("helloworld.pcm", MediaType.get("audio/pcm"))
         val testSubject = UploadFile(fileUploadService)
 
         testSubject("helloworld.pcm", fileToUpload)
@@ -35,25 +39,22 @@ class UploadFileTest {
         coVerify { fileUploadService.upload(preSignedUrl, requestBody) }
     }
 
-    private fun mockRequestBodyCreate(file: File, mediaTypeString: String): RequestBody {
-        mockkStatic("okhttp3.RequestBody")
-        val requestBody = mockk<RequestBody>()
-        every { RequestBody.create(MediaType.get(mediaTypeString), file) } answers {
-            requestBody
-        }
-        return requestBody
-    }
-
     @Test
-    fun `calls getMediaType`() = runTest {
-        val fileToUpload = mockk<File>(relaxed = true)
-        val fileUploadService = mockk<FileUploadService>(relaxed = true)
-        val getMediaType = mockk<(String) -> MediaType>()
-        every { getMediaType("audio.pcm") } returns MediaType.get("audio/pcm")
+    fun `calls getMediaType and uses it to create request body`() = runTest {
+        val mediaType = MediaType.get("audio/pcm")
+        setupMocks("audio.pcm", mediaType)
         val testSubject = UploadFile(fileUploadService, getMediaType)
 
         testSubject("audio.pcm", fileToUpload)
 
         verify { getMediaType("audio.pcm") }
+        verify { RequestBody.create(mediaType, fileToUpload) }
+    }
+
+    private fun setupMocks(filename: String, mediaType: MediaType) {
+        coEvery { fileUploadService.getPreSignedUrl(filename) } returns preSignedUrl
+        coEvery { fileUploadService.upload(preSignedUrl, any()) } returns Unit
+        every { getMediaType(filename) } returns mediaType
+        every { RequestBody.create(mediaType, fileToUpload) } returns requestBody
     }
 }
