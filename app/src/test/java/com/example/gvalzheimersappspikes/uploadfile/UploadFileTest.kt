@@ -4,6 +4,8 @@ import io.mockk.*
 import kotlinx.coroutines.test.runTest
 import okhttp3.MediaType
 import okhttp3.RequestBody
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertThrows
 import org.junit.Test
 import java.io.File
 
@@ -56,5 +58,29 @@ class UploadFileTest {
         coEvery { fileUploadService.upload(preSignedUrl, any()) } returns Unit
         every { getMediaType(filename) } returns mediaType
         every { RequestBody.create(mediaType, fileToUpload) } returns requestBody
+    }
+}
+
+class GetMediaTypeFromExtensionTest {
+    @Test
+    fun `return application-json for json files`() {
+        val mediaType = getMediaTypeFromExtension("sample.json")
+
+        assertEquals(MediaType.get("application/json"), mediaType)
+    }
+
+    @Test
+    fun `return audio-pcm for pcm files`() {
+        val mediaType = getMediaTypeFromExtension("sample.pcm")
+
+        assertEquals(MediaType.get("audio/pcm"), mediaType)
+    }
+
+    @Test
+    fun `throws for unknown file type`() {
+        val exception = assertThrows(java.lang.IllegalArgumentException::class.java) {
+            getMediaTypeFromExtension("sample.txt")
+        }
+        assertEquals("Unknown file extension: txt", exception.message)
     }
 }

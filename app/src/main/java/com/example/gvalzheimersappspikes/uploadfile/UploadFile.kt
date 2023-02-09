@@ -15,6 +15,13 @@ class UploadFile(
     }
 }
 
-fun getMediaTypeFromExtension(extension: String): MediaType {
-    return MediaType.get("audio/pcm")
+@Suppress("MoveVariableDeclarationIntoWhen")
+fun getMediaTypeFromExtension(filename: String): MediaType {
+    val extension = filename.substringAfterLast(delimiter = '.', missingDelimiterValue = "")
+    val mediaTypeString = when (extension) {
+        "json" -> "application/json"
+        "pcm" -> "audio/pcm"
+        else -> throw IllegalArgumentException("Unknown file extension: $extension")
+    }
+    return MediaType.get(mediaTypeString)
 }
